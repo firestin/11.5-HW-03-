@@ -1,2 +1,2 @@
-SELECT * FROM fr.rfam_acc LIMIT 1;
+SELECT * FROM fr.rfam_clan LIMIT 1;
 
