@@ -1,2 +1,3 @@
-SELECT * FROM fr.rfam_clan LIMIT 1;
+SELECT COUNT(*) FROM full_region LIMIT 1;
+
 
