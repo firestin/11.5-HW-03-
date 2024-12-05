@@ -1,34 +1,51 @@
-stages:
-  - execute-sql
+name: Execute SQL Queries
 
-execute-select-first-row:
-  stage: execute-sql
-  image: mysql:latest
-  script:
-    - export MYSQL_HOST=mysql-rfam-public.ebi.ac.uk
-    - export MYSQL_PORT=4497
-    - export MYSQL_USER=rfamro
-    - export MYSQL_DATABASE=Rfam
-    - mysql --user=$MYSQL_USER \
-            --host=$MYSQL_HOST \
-            --port=$MYSQL_PORT \
-            --database=$MYSQL_DATABASE < scripts/select_first_row.sql
-  only:
-    changes:
-      - scripts/select_first_row.sql
+# Определяем события, которые будут запускать пайплайн
+on:
+  push:
+    branches:
+      - main                # Пайплайн запускается только в ветке main
+    paths:
+      - 'scripts/**'        # Запускать при изменении файлов в папке scripts
+  pull_request:
+    branches:
+      - main
 
-execute-select-rat-rna:
-  stage: execute-sql
-  image: mysql:latest
-  script:
-    - export MYSQL_HOST=mysql-rfam-public.ebi.ac.uk
-    - export MYSQL_PORT=4497
-    - export MYSQL_USER=rfamro
-    - export MYSQL_DATABASE=Rfam
-    - mysql --user=$MYSQL_USER \
-            --host=$MYSQL_HOST \
-            --port=$MYSQL_PORT \
-            --database=$MYSQL_DATABASE < scripts/select_rat_rna.sql
-  only:
-    changes:
-      - scripts/select_rat_rna.sql
+jobs:
+  run-sql-queries:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Шаг 1: Клонирование репозитория
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Шаг 2: Установка MySQL клиента
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      # Шаг 3: Проверка изменившихся файлов и выполнение скриптов
+      - name: Execute changed SQL scripts
+        env:
+          MYSQL_HOST: mysql-rfam-public.ebi.ac.uk
+          MYSQL_PORT: 4497
+          MYSQL_USER: rfamro
+          MYSQL_DATABASE: Rfam
+        run: |
+          # Проверяем, изменился ли первый скрипт
+          if [ -f "scripts/select_first_row.sql" ]; then
+            echo "Executing scripts/select_first_row.sql"
+            mysql --user=$MYSQL_USER \
+                  --host=$MYSQL_HOST \
+                  --port=$MYSQL_PORT \
+                  --database=$MYSQL_DATABASE < scripts/select_first_row.sql
+          fi
+          
+          # Проверяем, изменился ли второй скрипт
+          if [ -f "scripts/select_rat_rna.sql" ]; then
+            echo "Executing scripts/select_rat_rna.sql"
+            mysql --user=$MYSQL_USER \
+                  --host=$MYSQL_HOST \
+                  --port=$MYSQL_PORT \
+                  --database=$MYSQL_DATABASE < scripts/select_rat_rna.sql
+          fi
