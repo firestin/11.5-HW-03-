@@ -1,0 +1,32 @@
+name: Execute SQL Query
+
+on:
+  push:
+    paths:
+      - 'scripts/**'  # Запускать пайплайн при изменении файлов в папке scripts.
+
+jobs:
+  run-sql-query:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Шаг 1: Клонирование репозитория
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Шаг 2: Установка MySQL клиента
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+      # Шаг 3: Выполнение SQL-скрипта
+      - name: Execute SQL script
+        env:
+          MYSQL_HOST: mysql-rfam-public.ebi.ac.uk
+          MYSQL_PORT: 4497
+          MYSQL_USER: rfamro
+          MYSQL_DATABASE: Rfam
+        run: |
+          mysql --user=$MYSQL_USER \
+                --host=$MYSQL_HOST \
+                --port=$MYSQL_PORT \
+                --database=$MYSQL_DATABASE < scripts/query.sql
