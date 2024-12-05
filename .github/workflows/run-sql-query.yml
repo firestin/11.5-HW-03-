@@ -30,6 +30,7 @@ jobs:
           MYSQL_HOST: mysql-rfam-public.ebi.ac.uk
           MYSQL_PORT: 4497
           MYSQL_USER: rfamro
+	  MYSQL_PASSWORD: none
           MYSQL_DATABASE: Rfam
         run: |
           # Проверяем, изменился ли первый скрипт
